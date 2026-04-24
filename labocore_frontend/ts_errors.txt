@@ -1,0 +1,6 @@
+﻿src/pages/Inventory.tsx(85,15): error TS2322: Type '{ children: Element[]; style: { borderColor: string; backgroundColor: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & CardProps'.
+src/pages/Inventory.tsx(89,15): error TS2322: Type '{ children: Element[]; style: { borderColor: string; backgroundColor: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & CardProps'.
+src/pages/Technicians.tsx(18,26): error TS2322: Type '{ children: Element[]; key: number; style: { textAlign: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
+  Property 'style' does not exist on type 'IntrinsicAttributes & CardProps'.
