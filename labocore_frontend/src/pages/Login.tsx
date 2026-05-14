@@ -21,7 +21,7 @@ const Login: React.FC = () => {
 
     const success = await login(email, password)
     if (success) {
-      navigate('/')
+      navigate('/app/')
     } else {
       setError('Invalid credentials.')
     }
