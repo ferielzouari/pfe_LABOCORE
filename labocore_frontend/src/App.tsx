@@ -1,5 +1,6 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Samples from './pages/Samples'
@@ -22,10 +23,11 @@ export default function App() {
     <ThemeProvider>
       <LanguageProvider>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           
           <Route
-            path="/*"
+            path="/app/*"
             element={
               <ProtectedRoute>
                 <AppShell>
@@ -38,12 +40,22 @@ export default function App() {
                     <Route path="/technicians" element={<Technicians />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<Navigate to="/app/" replace />} />
                   </Routes>
                 </AppShell>
               </ProtectedRoute>
             }
           />
+
+          {/* Redirect old routes to new /app/* structure */}
+          <Route path="/dashboard" element={<Navigate to="/app/" replace />} />
+          <Route path="/samples" element={<Navigate to="/app/samples" replace />} />
+          <Route path="/results" element={<Navigate to="/app/results" replace />} />
+          <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
+          <Route path="/suppliers" element={<Navigate to="/app/suppliers" replace />} />
+          <Route path="/technicians" element={<Navigate to="/app/technicians" replace />} />
+          <Route path="/reports" element={<Navigate to="/app/reports" replace />} />
+          <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
         </Routes>
       </LanguageProvider>
     </ThemeProvider>

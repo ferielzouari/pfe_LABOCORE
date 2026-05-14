@@ -1,16 +1,19 @@
 :root {
-  /* Colors */
-  --bg-color: #1a1f2e;
+  /* Colors - Medical Blue/Purple Theme */
+  --bg-color: #f7fbff;
   --surface-color: #ffffff;
-  --surface-hover: #f8fafc;
-  --primary-color: #6d28d9;
-  --primary-hover: #5b21b6;
-  --primary-light: #ede9fe;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
-  --border-color: #e2e8f0;
-  
+  --surface-hover: #f0f4ff;
+  --primary-color: #3b5bdb;
+  --primary-hover: #2d47b8;
+  --primary-light: #e8ebf8;
+  --primary-dark: #2743a0;
+  --secondary-color: #7c3aed;
+  --secondary-light: #f3e8ff;
+  --accent-color: #6d7dff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-light: #64748b;
+  --border-color: #dce4f0;
   /* Status Colors */
   --success: #10b981;
   --success-bg: #d1fae5;
@@ -18,7 +21,7 @@
   --warning-bg: #fef3c7;
   --danger: #ef4444;
   --danger-bg: #fee2e2;
-  --info: #3b82f6;
+  --info: #3b5bdb;
   --info-bg: #dbeafe;
 
   /* Spacing */

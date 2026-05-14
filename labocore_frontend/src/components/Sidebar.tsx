@@ -21,9 +21,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   ];
 
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
-      <div className="sidebar-header">
-        <div className="sidebar-brand">LABOCORE</div>
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`} style={{ background: 'linear-gradient(180deg, #3b5bdb 0%, #2d47b8 100%)' }}>
+      <div className="sidebar-header" style={{ borderBottomColor: 'rgba(255,255,255,0.1)' }}>
+        <div className="sidebar-brand" style={{ color: 'white', fontSize: '1.25rem', fontWeight: 700 }}>🔬 LABOCORE</div>
       </div>
       <nav className="sidebar-nav">
         {navItems.map((item) => {
@@ -35,8 +35,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               className={() => `nav-item ${isActive ? 'active' : ''}`}
               onClick={onClose}
               end={item.path === '/'}
+              style={isActive ? {
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                borderRadius: '0.75rem',
+              } : {
+                color: 'rgba(255,255,255,0.8)',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
+                }
+              }}
             >
-              <svg className="nav-icon" viewBox="0 0 24 24">
+              <svg className="nav-icon" viewBox="0 0 24 24" style={{ stroke: 'currentColor' }}>
                 {item.icon}
               </svg>
               {item.name}

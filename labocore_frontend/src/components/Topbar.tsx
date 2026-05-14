@@ -30,16 +30,13 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="topbar-floating">
+    <header className="topbar-floating" style={{ background: 'linear-gradient(90deg, #ffffff 0%, #f8fbff 100%)', boxShadow: '0 4px 20px rgba(59, 91, 219, 0.08)' }}>
       {/* Left Section: Logo and Brand */}
       <div className="topbar-logo-section">
-        <div className="logo-badge">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M8 3h8v6h-8z M8 12h8v6h-8z M4 9h2M4 18h2M18 9h2M18 18h2"></path>
-            <path d="M12 2v20"></path>
-          </svg>
+        <div className="logo-badge" style={{ background: 'linear-gradient(135deg, #3b5bdb 0%, #7c3aed 100%)' }}>
+          <span style={{ fontSize: '1.125rem' }}>🔬</span>
         </div>
-        <span className="brand-text">LABOCORE</span>
+        <span className="brand-text" style={{ color: '#3b5bdb', fontWeight: 700 }}>LABOCORE</span>
       </div>
 
       {/* Center Section: Search Bar */}

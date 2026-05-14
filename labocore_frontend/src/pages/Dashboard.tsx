@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
       <div className="page-header">
         <div>
           <h2 className="page-title">Dashboard</h2>
-          <p className="page-subtitle">Overview of laboratory operations and alerts</p>
+          <p className="page-subtitle">Welcome back! Here's your laboratory overview.</p>
         </div>
         <div className="page-actions">
           <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -86,9 +86,9 @@ const Dashboard: React.FC = () => {
 
       <div className="grid-cols-2">
         <Card noPadding>
-          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Recent Activity</h3>
-            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600 }}>View All Activity</button>
+          <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #e8ebf8 0%, #f3e8ff 100%)' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#0f172a' }}>Recent Activity</h3>
+            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600 }}>View All</button>
           </div>
           <div className="table-container">
             <DataTable data={mockActivity} columns={activityCols} keyExtractor={r => r.id} />
@@ -96,14 +96,30 @@ const Dashboard: React.FC = () => {
         </Card>
 
         <Card>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem' }}>Workload Overview</h3>
-          <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-color)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: '0.75rem', opacity: 0.5 }}>
-                <path d="M12 20V10M18 20V4M6 20v-4" />
-              </svg>
-              <p>Workload Analytics Chart</p>
-            </div>
+          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', color: '#0f172a' }}>Lab Performance</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { label: 'Sample Processing Rate', value: 92, color: '#3b5bdb' },
+              { label: 'Quality Assurance', value: 98, color: '#10b981' },
+              { label: 'Equipment Status', value: 87, color: '#f59e0b' },
+            ].map((metric, i) => (
+              <div key={i}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)' }}>{metric.label}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: metric.color }}>{metric.value}%</span>
+                </div>
+                <div style={{ height: '8px', backgroundColor: 'var(--surface-hover)', borderRadius: '9999px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      backgroundColor: metric.color,
+                      width: `${metric.value}%`,
+                      transition: 'width 0.3s ease',
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
       </div>
