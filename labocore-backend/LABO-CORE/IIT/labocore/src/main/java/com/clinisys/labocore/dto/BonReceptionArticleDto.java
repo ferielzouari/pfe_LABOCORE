@@ -4,13 +4,15 @@ import java.time.LocalDateTime;
 
 public record BonReceptionArticleDto(
         String numbon,
-        LocalDateTime datbon,
-        String codfrs,
+        LocalDateTime datebon,
+        String codFrs,
         String raiSoc,
         String codart,
         String desart,
-        Double quantite,
-        Double receptionnerLabo,
-        Double parameterLabo,
-        Integer coddep
-) {}
+        String numLot,
+        LocalDateTime datePeremption,
+        Double qteCmd,
+        Double qteRec,
+        Double qteLiv,
+        Integer numLigne
+) {}

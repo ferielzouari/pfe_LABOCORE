@@ -6,15 +6,21 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "mention_risque") //schema = "dbo")
+@Table(name = "mention_risque", schema = "dbo")
 public class MentionRisque {
 
     @Id
     @Column(name = "id")
     private Integer id;
 
+    @Column(name = "code")
+    private String code;
+
     @Column(name = "designation")
     private String designation;
+
+    @Column(name = "designation_ANG")
+    private String designationAng;
 
     public MentionRisque() {
     }

@@ -13,8 +13,8 @@ import jakarta.persistence.Table;
  * to the real SQL Server table/columns when available.
  */
 @Entity
-@Table(name = "conseil_prudence") //schema = "dbo")
-public class ConseilPrudence {
+@Table(name = "conseilsprudence", schema = "dbo")
+public class ConseilsPrudence {
 
     @Id
     @Column(name = "id")
@@ -26,7 +26,10 @@ public class ConseilPrudence {
     @Column(name = "designation", length = 500)
     private String designation;
 
-    public ConseilPrudence() {
+    @Column(name = "designation_ANG")
+    private String designationAng;
+
+    public ConseilsPrudence() {
     }
 
     public Integer getId() {

@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "details_article_automate") //schema = "dbo")
+@Table(name = "details_article_automate", schema = "dbo")
 public class DetailsArticleAutomate {
 
     @EmbeddedId

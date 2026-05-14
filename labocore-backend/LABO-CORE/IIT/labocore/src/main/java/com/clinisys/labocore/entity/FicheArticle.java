@@ -7,7 +7,7 @@ import jakarta.persistence.*;
  * PK: code_article (String, assigned by caller — no auto-generation)
  */
 @Entity
-@Table(name = "Fiche_article") //schema = "dbo")
+@Table(name = "Fiche_article", schema = "dbo")
 public class FicheArticle {
 
     @Id

@@ -51,8 +51,8 @@ public class FicheArticleServiceImpl implements FicheArticleService {
         PageRequest pageable = PageRequest.of(page - 1, size,
                 Sort.by("codeArticle").ascending());
 
-        String codeFilter        = blankToNull(code);
-        String designationFilter = blankToNull(designation);
+        String codeFilter        = (code != null && !code.isBlank()) ? code : "";
+        String designationFilter = (designation != null && !designation.isBlank()) ? designation : "";
 
         Page<FicheArticle> result = ficheRepo.search(codeFilter, designationFilter, pageable);
 
@@ -261,7 +261,7 @@ public class FicheArticleServiceImpl implements FicheArticleService {
     // ── Utilities ─────────────────────────────────────────────────────────
 
     private String blankToNull(String s) {
-        return (s != null && !s.isBlank()) ? s : null;
+        return (s != null && !s.isBlank()) ? s : "";
     }
 
     private String nullToEmpty(String s) {

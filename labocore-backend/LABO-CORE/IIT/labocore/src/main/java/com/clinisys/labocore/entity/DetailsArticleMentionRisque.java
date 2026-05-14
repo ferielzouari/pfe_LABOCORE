@@ -3,7 +3,7 @@ package com.clinisys.labocore.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "details_article_mention_risque") //schema = "dbo")
+@Table(name = "details_article_mention_risque", schema = "dbo")
 public class DetailsArticleMentionRisque {
 
     @EmbeddedId
