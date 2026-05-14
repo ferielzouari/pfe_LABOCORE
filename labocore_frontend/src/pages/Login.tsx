@@ -4,8 +4,8 @@ import Card from '../components/Card'
 import { useAuth } from '../auth/AuthProvider'
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('admin@lab.com')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('admin')
+  const [password, setPassword] = useState('admin')
   const [error, setError] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()

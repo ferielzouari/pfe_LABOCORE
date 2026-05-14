@@ -85,18 +85,25 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid-cols-2">
-        <Card>
-          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.125rem' }}>Recent Activity</h3>
-            <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>View All</button>
+        <Card noPadding>
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Recent Activity</h3>
+            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 600 }}>View All Activity</button>
           </div>
-          <DataTable data={mockActivity} columns={activityCols} keyExtractor={r => r.id} />
+          <div className="table-container">
+            <DataTable data={mockActivity} columns={activityCols} keyExtractor={r => r.id} />
+          </div>
         </Card>
 
         <Card>
-          <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem' }}>Workload Overview</h3>
-          <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
-            [ Chart Placeholder: Workload by Department ]
+          <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem' }}>Workload Overview</h3>
+          <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-color)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            <div style={{ textAlign: 'center' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: '0.75rem', opacity: 0.5 }}>
+                <path d="M12 20V10M18 20V4M6 20v-4" />
+              </svg>
+              <p>Workload Analytics Chart</p>
+            </div>
           </div>
         </Card>
       </div>

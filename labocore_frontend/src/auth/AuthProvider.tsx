@@ -46,31 +46,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!username || !password) return false
 
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ username, password }),
       })
 
-      if (!res.ok) return false
+      if (!response.ok) {
+        return false
+      }
 
-      const data = await res.json()
-      // data = { token, name, role }
+      const data = await response.json()
+      
+      // Map backend response to our User type
+      const authUser: User = { 
+        name: data.name || username, 
+        role: data.role || 'user' 
+      }
+      
+      const authData = {
+        token: data.token,
+        user: authUser,
+      }
 
-      const u: User = { name: data.name, role: data.role }
-
-      setUser(u)
-      setToken(data.token)
+      setUser(authData.user)
+      setToken(authData.token)
       setIsAuthenticated(true)
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        token: data.token,
-        user: u,
-      }))
-
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(authData))
       return true
-    } catch (err) {
-      console.error('Login error:', err)
+    } catch (error) {
+      console.error('Login error:', error)
       return false
     }
   }
