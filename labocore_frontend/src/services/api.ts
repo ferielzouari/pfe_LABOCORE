@@ -85,7 +85,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     ...options,
   })
 
-  if (res.status === 401 || res.status === 403) {
+  if (res.status === 401) {
     localStorage.removeItem('labocore_auth')
     window.location.href = '/login'
     throw new Error('Authorization failed. Please log in again.')
@@ -418,4 +418,82 @@ export const techniciensApi = {
   create: (body: TechnicienSaveRequest) => request<TechnicienDto>('/techniciens', { method: 'POST', body: JSON.stringify(body) }),
   update: (id: number, body: TechnicienSaveRequest) => request<TechnicienDto>(`/techniciens/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   delete: (id: number) => fetch(`${BASE_URL}/techniciens/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) } }).then(r => { if (!r.ok) return r.json().then(e => { throw e }) }),
+}
+
+// ── MouvementStock API ────────────────────────────────────────────────────
+
+export interface MouvementStockDto {
+  id: number
+  codart: string
+  typeMouvement: string
+  quantite: number
+  numLot?: string
+  datePeremption?: string
+  dateMouvement: string
+  motif?: string
+  utilisateur?: string
+}
+
+export interface MouvementStockSaveRequest {
+  codart: string
+  typeMouvement: 'SORTIE' | 'ENTREE' | 'AJUSTEMENT'
+  quantite: number
+  numLot?: string
+  datePeremption?: string
+  motif?: string
+  utilisateur?: string
+}
+
+export const mouvementsApi = {
+  getAll: (page = 1, size = 20, codart = '', type = '') =>
+    request<PagedResponse<MouvementStockDto>>(
+      `/mouvements?page=${page}&size=${size}&codart=${encodeURIComponent(codart)}&type=${encodeURIComponent(type)}`
+    ),
+  create: (body: MouvementStockSaveRequest) =>
+    request<MouvementStockDto>('/mouvements', { method: 'POST', body: JSON.stringify(body) }),
+  delete: (id: number) =>
+    fetch(`${BASE_URL}/mouvements/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) }
+    }).then(r => { if (!r.ok) return r.json().then(e => { throw e }) }),
+}
+
+// ── EchantillonAnalyse API ────────────────────────────────────────────────
+
+export interface EchantillonAnalyseDto {
+  id: number
+  echantillonId: number
+  sampleId: string
+  patientId: string
+  codeDemande: string
+  designationAnalyse: string
+  statut: string
+  resultat?: string
+  dateAssignation: string
+}
+
+export interface EchantillonAnalyseSaveRequest {
+  echantillonId: number
+  codeDemande: string
+  statut?: string
+}
+
+export const echantillonAnalysesApi = {
+  getAll: (page = 1, size = 20, echantillonId?: number, statut = '') =>
+    request<PagedResponse<EchantillonAnalyseDto>>(
+      `/echantillon-analyses?page=${page}&size=${size}${echantillonId ? `&echantillonId=${echantillonId}` : ''}&statut=${encodeURIComponent(statut)}`
+    ),
+  getBySample: (echantillonId: number) =>
+    request<EchantillonAnalyseDto[]>(`/echantillon-analyses/sample/${echantillonId}`),
+  create: (body: EchantillonAnalyseSaveRequest) =>
+    request<EchantillonAnalyseDto>('/echantillon-analyses', { method: 'POST', body: JSON.stringify(body) }),
+  updateStatut: (id: number, statut: string, resultat?: string) =>
+    request<EchantillonAnalyseDto>(`/echantillon-analyses/${id}/statut`, {
+      method: 'PATCH', body: JSON.stringify({ statut, resultat })
+    }),
+  delete: (id: number) =>
+    fetch(`${BASE_URL}/echantillon-analyses/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) }
+    }).then(r => { if (!r.ok) return r.json().then(e => { throw e }) }),
 }
