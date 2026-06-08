@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Card from '../components/Card'
 import Badge from '../components/Badge'
 import DataTable, { Column } from '../components/DataTable'
-import { articlesApi, ArticleDetailsDto, ArticleSaveRequest, riskConditionsApi, FicheSecuriteDto } from '../services/api'
+import { articlesApi, ArticleDetailsDto, ArticleSaveRequest, riskConditionsApi, FicheSecuriteDto, stockAlertsApi, NotificationLogDto } from '../services/api'
 
 // ── Risk Condition Form Modal ─────────────────────────────────────────────
 
@@ -252,6 +252,10 @@ const Settings: React.FC = () => {
   const [artDeleteConfirm, setArtDeleteConfirm] = useState<string | null>(null)
   const PAGE_SIZE = 10
 
+  // Notification logs state
+  const [notifLogs, setNotifLogs] = useState<NotificationLogDto[]>([])
+  const [notifLoading, setNotifLoading] = useState(false)
+
   // Risk Conditions state
   const [risks, setRisks] = useState<FicheSecuriteDto[]>([])
   const [riskTotal, setRiskTotal] = useState(0)
@@ -291,10 +295,23 @@ const Settings: React.FC = () => {
     }
   }, [riskPage, riskSearch])
 
+  const fetchNotifLogs = useCallback(async () => {
+    setNotifLoading(true)
+    try {
+      const data = await stockAlertsApi.getLogs()
+      setNotifLogs(data)
+    } catch {
+      setNotifLogs([])
+    } finally {
+      setNotifLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (activeTab === 'Articles') fetchArticles()
     if (activeTab === 'Risk Conditions') fetchRisks()
-  }, [activeTab, fetchArticles, fetchRisks])
+    if (activeTab === 'Notifications') fetchNotifLogs()
+  }, [activeTab, fetchArticles, fetchRisks, fetchNotifLogs])
 
   // Handlers for Articles
   const handleArtSave = async (data: ArticleSaveRequest) => {
@@ -663,11 +680,98 @@ const Settings: React.FC = () => {
         </div>
       )}
 
-      {/* Other Tabs */}
-      {(activeTab === 'Notifications' || activeTab === 'Security') && (
+      {/* Notifications Tab */}
+      {activeTab === 'Notifications' && (
+        <>
+          {/* Email Configuration */}
+          <Card style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem', color: 'var(--text-main)' }}>Email Configuration</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+              {[
+                { label: 'From Address', value: 'labocore.alerts@gmail.com' },
+                { label: 'SMTP Server', value: 'smtp.gmail.com:587' },
+                { label: 'Trigger Condition', value: 'Stock level ≤ 5 units' },
+              ].map(item => (
+                <div key={item.label} style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', padding: '0.875rem 1rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: '0.25rem' }}>{item.label}</div>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--text-main)', fontWeight: 600 }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Notification Logs */}
+          <Card noPadding>
+            <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--text-main)' }}>Email Notification Log</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>History of all stock alert emails sent to suppliers</div>
+              </div>
+              <button
+                className="btn btn-outline"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem' }}
+                onClick={fetchNotifLogs}
+                disabled={notifLoading}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                {notifLoading ? 'Refreshing…' : 'Refresh'}
+              </button>
+            </div>
+
+            {notifLoading ? (
+              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading logs…</div>
+            ) : notifLogs.length === 0 ? (
+              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                No notifications have been sent yet.
+              </div>
+            ) : (
+              <div className="table-container">
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8125rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)' }}>
+                      {['Article Code', 'Article Name', 'Supplier', 'Email Sent To', 'Stock Level', 'Sent At', 'Status'].map(h => (
+                        <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notifLogs.map((log, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: 'var(--primary-color)' }}>{log.codart}</td>
+                        <td style={{ padding: '0.75rem 1rem', color: 'var(--text-main)' }}>{log.desart}</td>
+                        <td style={{ padding: '0.75rem 1rem', color: 'var(--text-main)' }}>{log.supplierName || '—'}</td>
+                        <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{log.supplierEmail || '—'}</td>
+                        <td style={{ padding: '0.75rem 1rem', color: '#ef4444', fontWeight: 600 }}>{log.stockLevel}</td>
+                        <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          {new Date(log.sentAt).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem' }}>
+                          <span style={{
+                            fontSize: '0.6875rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px',
+                            background: log.status === 'Sent' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+                            color: log.status === 'Sent' ? '#22c55e' : '#ef4444',
+                          }}>
+                            {log.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </>
+      )}
+
+      {/* Security Tab */}
+      {activeTab === 'Security' && (
         <div className="grid-cols-2">
           <Card>
-            <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>{activeTab}</h3>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Security</h3>
             <p style={{ color: 'var(--text-muted)' }}>This section is currently under development.</p>
           </Card>
         </div>

@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Samples from './pages/Samples'
 import Results from './pages/Results'
 import Inventory from './pages/Inventory'
+import StockMovements from './pages/StockMovements'
 import Suppliers from './pages/Suppliers'
 import Technicians from './pages/Technicians'
 import Reports from './pages/Reports'
@@ -36,6 +37,7 @@ export default function App() {
                     <Route path="/samples" element={<Samples />} />
                     <Route path="/results" element={<Results />} />
                     <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/stock-movements" element={<StockMovements />} />
                     <Route path="/suppliers" element={<Suppliers />} />
                     <Route path="/technicians" element={<Technicians />} />
                     <Route path="/reports" element={<Reports />} />

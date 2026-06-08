@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../auth/AuthProvider';
 import CommandPalette from './ui/CommandPalette';
+import { stockAlertsApi, StockAlertDto } from '../services/api';
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -17,6 +18,10 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const [showLang, setShowLang]               = useState(false);
   const [showProfile, setShowProfile]         = useState(false);
   const [cmdOpen, setCmdOpen]                 = useState(false);
+  const [alerts, setAlerts]                   = useState<StockAlertDto[]>([]);
+  const [showAlerts, setShowAlerts]           = useState(false);
+  const [sendStatus, setSendStatus]           = useState<Record<string, 'sending' | 'sent' | 'failed'>>({});
+  const alertsRef                             = useRef<HTMLDivElement>(null);
 
   const languages = ['EN', 'FR', 'AR'] as const;
 
@@ -39,6 +44,48 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
     window.addEventListener('click', handler);
     return () => window.removeEventListener('click', handler);
   }, [showLang, showProfile]);
+
+  /* Close alert dropdown when clicking outside */
+  useEffect(() => {
+    if (!showAlerts) return;
+    const handler = (e: MouseEvent) => {
+      if (alertsRef.current && !alertsRef.current.contains(e.target as Node)) {
+        setShowAlerts(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showAlerts]);
+
+  /* Load alerts on mount and auto-send to suppliers with email */
+  useEffect(() => {
+    stockAlertsApi.getAlerts().then(data => {
+      setAlerts(data);
+      data.forEach(alert => {
+        if (alert.supplierEmail) {
+          stockAlertsApi.notifySupplier(alert).catch(() => {});
+        }
+      });
+    }).catch(() => {});
+  }, []);
+
+  const handleBellClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!showAlerts) {
+      stockAlertsApi.getAlerts().then(setAlerts).catch(() => {});
+    }
+    setShowAlerts(v => !v);
+  };
+
+  const handleNotify = async (alert: StockAlertDto) => {
+    setSendStatus(prev => ({ ...prev, [alert.codart]: 'sending' }));
+    try {
+      await stockAlertsApi.notifySupplier(alert);
+      setSendStatus(prev => ({ ...prev, [alert.codart]: 'sent' }));
+    } catch {
+      setSendStatus(prev => ({ ...prev, [alert.codart]: 'failed' }));
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -133,14 +180,104 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
           </button>
 
           {/* Notifications */}
-          <div className="notification-wrapper">
-            <button className="icon-btn notification-btn" title={t('notifications')}>
+          <div className="notification-wrapper" ref={alertsRef} style={{ position: 'relative' }}>
+            <button className="icon-btn notification-btn" title={t('notifications')} onClick={handleBellClick}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
               </svg>
-              <span className="notification-badge">3</span>
+              {alerts.length > 0 && (
+                <span className="notification-badge" style={{ backgroundColor: '#ef4444', color: 'white' }}>
+                  {alerts.length}
+                </span>
+              )}
             </button>
+
+            {showAlerts && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                width: '380px',
+                maxHeight: '480px',
+                overflowY: 'auto',
+                background: 'var(--surface-color)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: 'var(--shadow-floating)',
+                zIndex: 200,
+                marginTop: '8px',
+              }}>
+                <div style={{
+                  padding: '1rem 1.25rem',
+                  borderBottom: '1px solid var(--border-color)',
+                  background: 'var(--surface-hover)',
+                  borderTopLeftRadius: 'var(--radius-lg)',
+                  borderTopRightRadius: 'var(--radius-lg)',
+                }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text-main)' }}>Stock Alerts</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Articles running low (≤ 5 units)</div>
+                </div>
+
+                <div style={{ padding: '0.5rem' }}>
+                  {alerts.length === 0 ? (
+                    <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--success)', fontSize: '0.875rem', fontWeight: 500 }}>
+                      ✓ All stock levels are normal
+                    </div>
+                  ) : alerts.map(alert => {
+                    const status = sendStatus[alert.codart];
+                    const noEmail = !alert.supplierEmail;
+                    return (
+                      <div key={alert.codart} style={{
+                        padding: '0.875rem 1rem',
+                        borderRadius: 'var(--radius-md)',
+                        marginBottom: '0.25rem',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--surface-color)',
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.375rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.875rem' }}>{alert.codart}</span>
+                          <span style={{ fontSize: '0.6875rem', fontWeight: 700, background: 'rgba(239,68,68,0.12)', color: '#ef4444', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.02em' }}>
+                            LOW STOCK
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--text-main)', marginBottom: '0.25rem', fontWeight: 500 }}>{alert.desart}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.375rem' }}>
+                          Current stock: <strong style={{ color: '#ef4444' }}>{alert.stkDep}</strong> units
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                          {alert.supplierName ? (
+                            <>
+                              <div>{alert.supplierName}</div>
+                              {alert.supplierEmail && <div style={{ color: 'var(--primary-color)' }}>{alert.supplierEmail}</div>}
+                            </>
+                          ) : (
+                            <span style={{ fontStyle: 'italic' }}>No supplier linked</span>
+                          )}
+                        </div>
+                        <button
+                          disabled={noEmail || status === 'sending' || status === 'sent'}
+                          onClick={() => handleNotify(alert)}
+                          style={{
+                            fontSize: '0.75rem', fontWeight: 600,
+                            padding: '0.375rem 0.875rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: 'none',
+                            cursor: (noEmail || status === 'sending' || status === 'sent') ? 'not-allowed' : 'pointer',
+                            background: status === 'sent' ? '#22c55e' : status === 'failed' ? '#ef4444' : status === 'sending' ? 'var(--primary-color)' : noEmail ? 'var(--surface-hover)' : 'var(--primary-color)',
+                            color: noEmail && !status ? 'var(--text-muted)' : 'white',
+                            opacity: status === 'sending' ? 0.7 : 1,
+                            transition: 'background 0.2s',
+                          }}
+                        >
+                          {status === 'sending' ? 'Sending…' : status === 'sent' ? 'Sent ✓' : status === 'failed' ? 'Failed — retry' : noEmail ? 'No email' : 'Send to Supplier'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* User profile */}

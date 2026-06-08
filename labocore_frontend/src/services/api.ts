@@ -458,6 +458,40 @@ export const mouvementsApi = {
     }).then(r => { if (!r.ok) return r.json().then(e => { throw e }) }),
 }
 
+// ── Stock Alerts API ──────────────────────────────────────────────────────
+
+export interface StockAlertDto {
+  codart: string
+  desart: string
+  stkDep: number
+  stkMin: number
+  famArt: string
+  supplierEmail?: string
+  supplierName?: string
+}
+
+export interface NotificationLogDto {
+  codart: string
+  desart: string
+  supplierName: string
+  supplierEmail: string
+  stockLevel: number
+  sentAt: string
+  status: string
+}
+
+export const stockAlertsApi = {
+  getAlerts: () =>
+    request<StockAlertDto[]>('/stock-alerts'),
+  notifySupplier: (alert: StockAlertDto) =>
+    request<{ message: string }>('/stock-alerts/notify', {
+      method: 'POST',
+      body: JSON.stringify(alert),
+    }),
+  getLogs: () =>
+    request<NotificationLogDto[]>('/stock-alerts/logs'),
+}
+
 // ── EchantillonAnalyse API ────────────────────────────────────────────────
 
 export interface EchantillonAnalyseDto {
