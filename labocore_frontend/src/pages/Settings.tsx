@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Card from '../components/Card'
 import Badge from '../components/Badge'
 import DataTable, { Column } from '../components/DataTable'
-import { articlesApi, ArticleDetailsDto, ArticleSaveRequest, riskConditionsApi, FicheSecuriteDto, stockAlertsApi, NotificationLogDto } from '../services/api'
+import { articlesApi, ArticleDetailsDto, ArticleSaveRequest, riskConditionsApi, FicheSecuriteDto, stockAlertsApi, NotificationLogDto, SchedulerStatusDto } from '../services/api'
 
 // ── Risk Condition Form Modal ─────────────────────────────────────────────
 
@@ -256,6 +256,9 @@ const Settings: React.FC = () => {
   const [notifLogs, setNotifLogs] = useState<NotificationLogDto[]>([])
   const [notifLoading, setNotifLoading] = useState(false)
 
+  // Autonomous agent scheduler status
+  const [schedulerStatus, setSchedulerStatus] = useState<SchedulerStatusDto | null>(null)
+
   // Risk Conditions state
   const [risks, setRisks] = useState<FicheSecuriteDto[]>([])
   const [riskTotal, setRiskTotal] = useState(0)
@@ -312,6 +315,10 @@ const Settings: React.FC = () => {
     if (activeTab === 'Risk Conditions') fetchRisks()
     if (activeTab === 'Notifications') fetchNotifLogs()
   }, [activeTab, fetchArticles, fetchRisks, fetchNotifLogs])
+
+  useEffect(() => {
+    stockAlertsApi.getSchedulerStatus().then(setSchedulerStatus).catch(() => {})
+  }, [])
 
   // Handlers for Articles
   const handleArtSave = async (data: ArticleSaveRequest) => {
@@ -683,6 +690,32 @@ const Settings: React.FC = () => {
       {/* Notifications Tab */}
       {activeTab === 'Notifications' && (
         <>
+          {/* Autonomous Agent Status */}
+          <Card style={{ marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>Autonomous Agent Status</h3>
+              <span style={{
+                fontSize: '0.6875rem', fontWeight: 700, padding: '2px 10px', borderRadius: '999px',
+                background: 'rgba(34,197,94,0.12)', color: '#22c55e',
+              }}>
+                {schedulerStatus?.status || 'Active'}
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              {[
+                { label: 'Last Run', value: schedulerStatus?.lastRunAt ? new Date(schedulerStatus.lastRunAt).toLocaleString() : 'Not yet run' },
+                { label: 'Next Run', value: schedulerStatus?.nextRunAt ? new Date(schedulerStatus.nextRunAt).toLocaleString() : '—' },
+                { label: 'Emails Sent Today', value: schedulerStatus?.totalSentToday ?? 0 },
+                { label: 'Emails Skipped Today', value: schedulerStatus?.totalSkippedToday ?? 0 },
+              ].map(item => (
+                <div key={item.label} style={{ background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', padding: '0.875rem 1rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: '0.25rem' }}>{item.label}</div>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--text-main)', fontWeight: 600 }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
           {/* Email Configuration */}
           <Card style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem', color: 'var(--text-main)' }}>Email Configuration</h3>

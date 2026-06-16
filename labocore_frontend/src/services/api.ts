@@ -480,6 +480,14 @@ export interface NotificationLogDto {
   status: string
 }
 
+export interface SchedulerStatusDto {
+  lastRunAt: string | null
+  nextRunAt: string
+  totalSentToday: number
+  totalSkippedToday: number
+  status: string
+}
+
 export const stockAlertsApi = {
   getAlerts: () =>
     request<StockAlertDto[]>('/stock-alerts'),
@@ -490,6 +498,12 @@ export const stockAlertsApi = {
     }),
   getLogs: () =>
     request<NotificationLogDto[]>('/stock-alerts/logs'),
+  notifyAll: () =>
+    request<{ sent: number, skipped: number, failed: number, message: string }>('/stock-alerts/notify-all', {
+      method: 'POST',
+    }),
+  getSchedulerStatus: () =>
+    request<SchedulerStatusDto>('/stock-alerts/scheduler-status'),
 }
 
 // ── EchantillonAnalyse API ────────────────────────────────────────────────
@@ -530,4 +544,19 @@ export const echantillonAnalysesApi = {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) }
     }).then(r => { if (!r.ok) return r.json().then(e => { throw e }) }),
+}
+
+// ── AI Assistant API ──────────────────────────────────────────────────────
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export const chatApi = {
+  sendMessage: (messages: ChatMessage[]) =>
+    request<{ reply: string }>('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages })
+    }),
 }

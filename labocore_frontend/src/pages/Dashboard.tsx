@@ -8,6 +8,7 @@ import DataTable, { Column } from '../components/DataTable'
 import Card from '../components/Card'
 import { bonReceptionApi, BonReceptionDto, BonReceptionSaveRequest,
 BonReceptionLigneRequest, fournisseursApi, FournisseurDto } from '../services/api'
+import AIAssistant from '../components/AIAssistant'
 
 interface Activity {
   id: string;
@@ -73,6 +74,9 @@ const Dashboard: React.FC = () => {
 
     return () => { tl.kill() }
   }, [])
+
+  // ── AI Assistant State ──────────────────────────────────────────────────
+  const [showAIAssistant, setShowAIAssistant] = useState(false)
 
   // ── Goods Reception: Shared UI State ───────────────────────────────────────
   const [successMsg, setSuccessMsg] = useState('')
@@ -225,13 +229,15 @@ const Dashboard: React.FC = () => {
             </svg>
           }>Export</RippleButton>
 
-          <RippleButton variant="primary" magnetic icon={
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14"/>
+          <RippleButton variant="primary" magnetic onClick={() => setShowAIAssistant(true)} icon={
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
             </svg>
-          }>New Sample</RippleButton>
+          }>AI Assistant</RippleButton>
         </div>
       </div>
+
+      {showAIAssistant && <AIAssistant onClose={() => setShowAIAssistant(false)} />}
 
       {/* ── Stat Cards ── */}
       <div className="grid-cols-4 mb-6" ref={statsRef}>

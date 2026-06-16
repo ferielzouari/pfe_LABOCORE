@@ -21,6 +21,8 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const [alerts, setAlerts]                   = useState<StockAlertDto[]>([]);
   const [showAlerts, setShowAlerts]           = useState(false);
   const [sendStatus, setSendStatus]           = useState<Record<string, 'sending' | 'sent' | 'failed'>>({});
+  const [notifyAllStatus, setNotifyAllStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [notifyAllMessage, setNotifyAllMessage] = useState('');
   const alertsRef                             = useRef<HTMLDivElement>(null);
 
   const languages = ['EN', 'FR', 'AR'] as const;
@@ -84,6 +86,17 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
       setSendStatus(prev => ({ ...prev, [alert.codart]: 'sent' }));
     } catch {
       setSendStatus(prev => ({ ...prev, [alert.codart]: 'failed' }));
+    }
+  };
+
+  const handleNotifyAll = async () => {
+    setNotifyAllStatus('sending');
+    try {
+      const result = await stockAlertsApi.notifyAll();
+      setNotifyAllMessage(result.message);
+      setNotifyAllStatus('success');
+    } catch {
+      setNotifyAllStatus('error');
     }
   };
 
@@ -215,8 +228,42 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
                   borderTopLeftRadius: 'var(--radius-lg)',
                   borderTopRightRadius: 'var(--radius-lg)',
                 }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text-main)' }}>Stock Alerts</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Articles running low (≤ 5 units)</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text-main)' }}>Stock Alerts</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Top 10 most critical articles</div>
+                    </div>
+                    {alerts.some(a => a.supplierEmail) && (
+                      <button
+                        onClick={handleNotifyAll}
+                        disabled={notifyAllStatus === 'sending'}
+                        style={{
+                          fontSize: '0.6875rem', fontWeight: 600,
+                          padding: '0.3rem 0.625rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--primary-color)',
+                          background: 'transparent',
+                          color: 'var(--primary-color)',
+                          cursor: notifyAllStatus === 'sending' ? 'not-allowed' : 'pointer',
+                          opacity: notifyAllStatus === 'sending' ? 0.7 : 1,
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {notifyAllStatus === 'sending' ? 'Sending…' : 'Notify All Suppliers'}
+                      </button>
+                    )}
+                  </div>
+                  {notifyAllStatus === 'success' && (
+                    <div style={{ fontSize: '0.75rem', color: '#22c55e', marginTop: '0.5rem', fontWeight: 600 }}>
+                      {notifyAllMessage}
+                    </div>
+                  )}
+                  {notifyAllStatus === 'error' && (
+                    <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.5rem', fontWeight: 600 }}>
+                      Failed — try again
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ padding: '0.5rem' }}>
@@ -272,6 +319,11 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
                         >
                           {status === 'sending' ? 'Sending…' : status === 'sent' ? 'Sent ✓' : status === 'failed' ? 'Failed — retry' : noEmail ? 'No email' : 'Send to Supplier'}
                         </button>
+                        {noEmail && (
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '0.375rem' }}>
+                            Article has no reception history. Link a supplier via Goods Reception to enable notifications.
+                          </div>
+                        )}
                       </div>
                     );
                   })}
