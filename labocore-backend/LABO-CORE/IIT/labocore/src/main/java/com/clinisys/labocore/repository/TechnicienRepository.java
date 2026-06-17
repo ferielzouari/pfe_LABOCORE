@@ -30,4 +30,6 @@ public interface TechnicienRepository extends JpaRepository<Technicien, Long> {
     List<String> findDistinctServices();
 
     Optional<Technicien> findByMatricule(String matricule);
+
+    List<Technicien> findByActifTrue();
 }

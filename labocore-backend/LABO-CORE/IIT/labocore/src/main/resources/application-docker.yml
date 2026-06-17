@@ -1,0 +1,20 @@
+# application-docker.yml
+# Active when running inside Docker (spring.profiles.active=docker)
+# Overrides only what changes inside the container network.
+
+spring:
+  datasource:
+    # DB_HOST is injected by docker-compose.yml as host.docker.internal
+    # so the container reaches the SQL Server running on your Windows machine.
+    url: "jdbc:sqlserver://${DB_HOST:host.docker.internal}:1433;databaseName=glabo;encrypt=true;trustServerCertificate=true"
+    username: sa
+    password: ${DB_PASSWORD:YourStrong!Passw0rd}
+
+  mail:
+    username: ${MAIL_USERNAME:zouari.feriel12@gmail.com}
+    password: ${MAIL_PASSWORD:afen fdvy hbrs ixbe}
+
+gemini:
+  api-key: ${GEMINI_API_KEY:PUT_YOUR_GEMINI_API_KEY_HERE}
+  model: gemini-2.5-flash-lite
+  api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent

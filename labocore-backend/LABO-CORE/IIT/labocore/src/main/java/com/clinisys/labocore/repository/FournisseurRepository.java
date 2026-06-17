@@ -15,4 +15,6 @@ public interface FournisseurRepository extends JpaRepository<Fournisseur, Long> 
     Page<Fournisseur> search(@Param("search") String search, Pageable pageable);
 
     Optional<Fournisseur> findByCode(String code);
+
+    Optional<Fournisseur> findFirstByEmailIsNotNull();
 }

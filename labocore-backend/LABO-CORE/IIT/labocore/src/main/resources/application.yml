@@ -29,6 +29,30 @@ spring:
     console:
       enabled: false
 
+  profiles:
+    active: local
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: zouari.feriel12@gmail.com
+    password: afen fdvy hbrs ixbe
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# AI Assistant — Gemini API (see ChatServiceImpl)
+gemini:
+  api-key: ${GEMINI_API_KEY:PUT_YOUR_GEMINI_API_KEY_HERE}
+  model: gemini-2.5-flash-lite
+  api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent
+
 logging:
   level:
     com.clinisys.labocore: DEBUG

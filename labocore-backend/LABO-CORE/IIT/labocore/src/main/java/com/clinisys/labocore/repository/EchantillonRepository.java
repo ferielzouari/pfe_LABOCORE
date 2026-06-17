@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface EchantillonRepository extends JpaRepository<Echantillon, Long> {
 
     @Query("""
@@ -23,4 +25,6 @@ public interface EchantillonRepository extends JpaRepository<Echantillon, Long> 
 
     @Query("SELECT MAX(e.id) FROM Echantillon e")
     Long findMaxId();
+
+    List<Echantillon> findTop10ByStatusOrderByCollectedAtDesc(String status);
 }

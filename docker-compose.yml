@@ -1,0 +1,55 @@
+# ══════════════════════════════════════════════════════════════════
+#  LABOCORE — Docker Compose
+#  Services: backend | frontend
+#
+#  SQL Server runs on the HOST machine (your local Windows install).
+#  The backend reaches it via the special Docker hostname:
+#    host.docker.internal → resolves to the Windows host IP from inside a container
+#
+#  Usage:
+#    docker compose up --build          # first run
+#    docker compose up -d               # background
+#    docker compose down                # stop containers
+# ══════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── 1. Spring Boot Backend ───────────────────────────────────────
+  backend:
+    build:
+      context: ./labocore-backend/LABO-CORE/IIT/labocore
+      dockerfile: Dockerfile
+    container_name: labocore-backend
+    environment:
+      # Overrides values in application-docker.yml
+      DB_HOST: host.docker.internal   # points to your local SQL Server on Windows
+      DB_PASSWORD: "${DB_PASSWORD}"
+      MAIL_USERNAME: "${MAIL_USERNAME}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # ensures host resolution on Linux too
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  # ── 2. React / Vite Frontend (Nginx) ─────────────────────────────
+  frontend:
+    build:
+      context: ./labocore_frontend
+      dockerfile: dockerfile
+      args:
+        VITE_API_URL: /api
+    container_name: labocore-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    restart: unless-stopped

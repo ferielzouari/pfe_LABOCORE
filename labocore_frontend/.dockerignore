@@ -1,0 +1,5 @@
+# Exclude local build output — Docker builds its own dist via `npm run build`
+dist
+node_modules
+.env
+*.log

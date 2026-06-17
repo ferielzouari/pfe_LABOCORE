@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BonReceptionRepository extends JpaRepository<BonReception, Long> {
@@ -18,4 +19,6 @@ public interface BonReceptionRepository extends JpaRepository<BonReception, Long
 
     @Query("SELECT MAX(b.numBon) FROM BonReception b WHERE b.numBon LIKE :prefix")
     String findMaxNumBon(@Param("prefix") String prefix);
+
+    List<BonReception> findTop5ByOrderByDateBonDesc();
 }
