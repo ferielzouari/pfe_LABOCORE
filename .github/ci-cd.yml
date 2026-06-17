@@ -1,0 +1,55 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Docker Buildx (multi-platform / cache support) ────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── 3. Login to Docker Hub (only on push to main) ────────────────────
+      - name: Login to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ── 4. Build & Push Backend ──────────────────────────────────────────
+      #   The backend Dockerfile is a multi-stage build (Maven → JRE).
+      #   Maven compilation happens inside Docker — no separate mvn step needed.
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./labocore-backend/LABO-CORE/IIT/labocore
+          dockerfile: ./labocore-backend/LABO-CORE/IIT/labocore/Dockerfile
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/labocore-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ── 5. Build & Push Frontend ─────────────────────────────────────────
+      #   Vite builds inside Docker; VITE_API_URL is /api so Nginx proxies it.
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./labocore_frontend
+          dockerfile: ./labocore_frontend/dockerfile
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/labocore-frontend:latest
+          build-args: |
+            VITE_API_URL=/api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
